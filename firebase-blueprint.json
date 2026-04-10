@@ -1,0 +1,140 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Menyimpan data produk yang dijual di POS.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category_id": { "type": "string" },
+        "price": { "type": "number" },
+        "image_url": { "type": "string" },
+        "is_active": { "type": "boolean" },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "price", "category_id"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Kategori produk.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Data transaksi penjualan.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "order_number": { "type": "string" },
+        "total_amount": { "type": "number" },
+        "tax_amount": { "type": "number" },
+        "payment_method": { "type": "string", "enum": ["CASH", "CARD", "QRIS", "TRANSFER"] },
+        "status": { "type": "string", "enum": ["SUCCESS", "PENDING", "CANCELLED"] },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["order_number", "total_amount", "payment_method", "status"]
+    },
+    "TransactionItem": {
+      "title": "TransactionItem",
+      "description": "Item dalam transaksi.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "transaction_id": { "type": "string" },
+        "product_id": { "type": "string" },
+        "quantity": { "type": "integer" },
+        "unit_price": { "type": "number" },
+        "subtotal": { "type": "number" }
+      },
+      "required": ["transaction_id", "product_id", "quantity", "unit_price", "subtotal"]
+    },
+    "InventoryItem": {
+      "title": "InventoryItem",
+      "description": "Bahan baku inventaris.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "unit": { "type": "string", "enum": ["KG", "GRAM", "LITER", "ML", "PCS", "UNIT"] },
+        "current_stock": { "type": "number" },
+        "min_stock_level": { "type": "number" },
+        "unit_cost": { "type": "number" },
+        "last_restock_date": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "unit", "current_stock"]
+    },
+    "Recipe": {
+      "title": "Recipe",
+      "description": "Mapping menu ke bahan baku.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "product_id": { "type": "string" },
+        "inventory_item_id": { "type": "string" },
+        "quantity_required": { "type": "number" }
+      },
+      "required": ["product_id", "inventory_item_id", "quantity_required"]
+    },
+    "Budget": {
+      "title": "Budget",
+      "description": "Anggaran keuangan.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "category_name": { "type": "string" },
+        "limit_amount": { "type": "number" },
+        "period_month": { "type": "integer" },
+        "period_year": { "type": "integer" },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["category_name", "limit_amount", "period_month", "period_year"]
+    },
+    "Expense": {
+      "title": "Expense",
+      "description": "Pengeluaran operasional.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "category_id": { "type": "string" },
+        "amount": { "type": "number" },
+        "description": { "type": "string" },
+        "transaction_date": { "type": "string", "format": "date" }
+      },
+      "required": ["category_id", "amount", "transaction_date"]
+    },
+    "AIInsight": {
+      "title": "AIInsight",
+      "description": "Insight dan rekomendasi AI.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["CASHFLOW", "INVENTORY", "BUDGET", "PROMO"] },
+        "status": { "type": "string", "enum": ["HEALTHY", "CAUTION", "CRITICAL"] },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "recommendation": { "type": "string" },
+        "is_read": { "type": "boolean" },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["type", "status", "title", "message"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": { "schema": "Product", "description": "Daftar produk" },
+    "/categories/{categoryId}": { "schema": "Category", "description": "Kategori produk" },
+    "/transactions/{transactionId}": { "schema": "Transaction", "description": "Data transaksi" },
+    "/transactions/{transactionId}/items/{itemId}": { "schema": "TransactionItem", "description": "Item transaksi" },
+    "/inventory_items/{itemId}": { "schema": "InventoryItem", "description": "Stok bahan baku" },
+    "/recipes/{recipeId}": { "schema": "Recipe", "description": "Resep produk" },
+    "/budgets/{budgetId}": { "schema": "Budget", "description": "Anggaran" },
+    "/expenses/{expenseId}": { "schema": "Expense", "description": "Pengeluaran" },
+    "/ai_insights/{insightId}": { "schema": "AIInsight", "description": "Insight AI" }
+  }
+}
