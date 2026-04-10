@@ -121,7 +121,7 @@ export default function Layout({ children, user, onLogout, currentPage, onPageCh
             <span className="text-xl font-bold text-zinc-900">fintera</span>
           </div>
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-            <SheetTrigger asChild>
+            <SheetTrigger>
               <Button variant="ghost" size="icon">
                 <Menu className="h-6 w-6" />
               </Button>
