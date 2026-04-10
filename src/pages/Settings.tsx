@@ -36,6 +36,7 @@ export default function Settings() {
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
   const [isRecipeDialogOpen, setIsRecipeDialogOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -69,6 +70,23 @@ export default function Settings() {
       setIsProductDialogOpen(false);
       setProductForm({ name: '', price: 0, category_id: '', image_url: '', is_active: true });
     } catch (e) { toast.error('Gagal'); }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const url = await dataService.uploadProductImage(file);
+      setProductForm({ ...productForm, image_url: url });
+      toast.success('Gambar berhasil diunggah');
+    } catch (error) {
+      console.error(error);
+      toast.error('Gagal mengunggah gambar. Pastikan bucket "product-images" sudah dibuat di Supabase Storage.');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleAddCategory = async (e: React.FormEvent) => {
@@ -226,6 +244,28 @@ export default function Settings() {
         <DialogContent>
           <DialogHeader><DialogTitle>Tambah Produk</DialogTitle></DialogHeader>
           <form onSubmit={handleAddProduct} className="space-y-4">
+            <div className="space-y-2">
+              <Label>Gambar Produk</Label>
+              <div className="flex items-center gap-4">
+                <div className="h-16 w-16 rounded-lg bg-zinc-100 overflow-hidden flex items-center justify-center border border-zinc-200">
+                  {productForm.image_url ? (
+                    <img src={productForm.image_url} className="h-full w-full object-cover" />
+                  ) : (
+                    <Coffee className="h-8 w-8 text-zinc-300" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <Input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleImageUpload} 
+                    disabled={isUploading}
+                    className="cursor-pointer"
+                  />
+                  {isUploading && <p className="text-xs text-zinc-500 mt-1 flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Mengunggah...</p>}
+                </div>
+              </div>
+            </div>
             <div className="space-y-2">
               <Label>Nama Produk</Label>
               <Input value={productForm.name} onChange={e => setProductForm({...productForm, name: e.target.value})} required />
