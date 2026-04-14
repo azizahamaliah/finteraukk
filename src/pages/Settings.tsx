@@ -133,39 +133,56 @@ export default function Settings() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Settings</h1>
-        <p className="text-zinc-500">Konfigurasi produk, kategori, dan resep bahan baku.</p>
+        <h1 className="text-4xl font-black tracking-tight text-zinc-900">Settings</h1>
+        <p className="mt-1 text-lg font-medium text-zinc-500">Konfigurasi produk, kategori, dan resep bahan baku.</p>
       </div>
 
-      <Tabs defaultValue="products" className="space-y-6">
-        <TabsList className="bg-zinc-100 p-1">
-          <TabsTrigger value="products" className="gap-2"><Coffee className="h-4 w-4" /> Produk</TabsTrigger>
-          <TabsTrigger value="categories" className="gap-2"><Tag className="h-4 w-4" /> Kategori</TabsTrigger>
-          <TabsTrigger value="recipes" className="gap-2"><ChefHat className="h-4 w-4" /> Resep</TabsTrigger>
+      <Tabs defaultValue="products" className="space-y-8">
+        <TabsList className="bg-white p-1.5 rounded-2xl shadow-sm ring-1 ring-zinc-100">
+          <TabsTrigger value="products" className="gap-2 px-6 py-2.5 rounded-xl font-bold data-[state=active]:bg-primary data-[state=active]:text-white transition-all">
+            <Coffee className="h-4 w-4" /> Produk
+          </TabsTrigger>
+          <TabsTrigger value="categories" className="gap-2 px-6 py-2.5 rounded-xl font-bold data-[state=active]:bg-primary data-[state=active]:text-white transition-all">
+            <Tag className="h-4 w-4" /> Kategori
+          </TabsTrigger>
+          <TabsTrigger value="recipes" className="gap-2 px-6 py-2.5 rounded-xl font-bold data-[state=active]:bg-primary data-[state=active]:text-white transition-all">
+            <ChefHat className="h-4 w-4" /> Resep
+          </TabsTrigger>
         </TabsList>
 
         {/* Products Tab */}
-        <TabsContent value="products" className="space-y-4">
+        <TabsContent value="products" className="space-y-6">
           <div className="flex justify-end">
-            <Button onClick={() => setIsProductDialogOpen(true)} className="gap-2">
-              <Plus className="h-4 w-4" /> Tambah Produk
+            <Button onClick={() => setIsProductDialogOpen(true)} className="h-12 px-6 rounded-xl font-bold gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+              <Plus className="h-5 w-5" /> Tambah Produk
             </Button>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {products.map(p => (
-              <Card key={p.id} className="border-none shadow-sm">
-                <CardContent className="flex items-center gap-4 p-4">
-                  <div className="h-12 w-12 rounded-lg bg-zinc-100 overflow-hidden">
-                    {p.image_url ? <img src={p.image_url} className="h-full w-full object-cover" /> : <Coffee className="h-6 w-6 m-3 text-zinc-300" />}
+              <Card key={p.id} className="border-none bg-white shadow-xl shadow-zinc-200/50 rounded-[2rem] overflow-hidden group">
+                <CardContent className="flex items-center gap-5 p-6">
+                  <div className="h-16 w-16 rounded-2xl bg-zinc-100 overflow-hidden ring-1 ring-zinc-100">
+                    {p.image_url ? (
+                      <img src={p.image_url} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" referrerPolicy="no-referrer" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-zinc-300">
+                        <Coffee className="h-8 w-8" />
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 overflow-hidden">
-                    <h4 className="font-semibold truncate">{p.name}</h4>
-                    <p className="text-sm text-zinc-500">Rp{p.price.toLocaleString()}</p>
+                    <h4 className="font-black text-zinc-900 truncate">{p.name}</h4>
+                    <p className="text-sm font-bold text-primary">Rp{p.price.toLocaleString()}</p>
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => deleteItem('products', p.id)} className="text-zinc-400 hover:text-rose-600">
-                    <Trash2 className="h-4 w-4" />
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => deleteItem('products', p.id)} 
+                    className="h-10 w-10 rounded-xl text-zinc-300 hover:text-rose-500 hover:bg-rose-50 transition-colors"
+                  >
+                    <Trash2 className="h-5 w-5" />
                   </Button>
                 </CardContent>
               </Card>
@@ -174,22 +191,27 @@ export default function Settings() {
         </TabsContent>
 
         {/* Categories Tab */}
-        <TabsContent value="categories" className="space-y-4">
+        <TabsContent value="categories" className="space-y-6">
           <div className="flex justify-end">
-            <Button onClick={() => setIsCategoryDialogOpen(true)} className="gap-2">
-              <Plus className="h-4 w-4" /> Tambah Kategori
+            <Button onClick={() => setIsCategoryDialogOpen(true)} className="h-12 px-6 rounded-xl font-bold gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+              <Plus className="h-5 w-5" /> Tambah Kategori
             </Button>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {categories.map(c => (
-              <Card key={c.id} className="border-none shadow-sm">
-                <CardContent className="flex items-center justify-between p-4">
+              <Card key={c.id} className="border-none bg-white shadow-xl shadow-zinc-200/50 rounded-[2rem] overflow-hidden">
+                <CardContent className="flex items-center justify-between p-6">
                   <div>
-                    <h4 className="font-semibold">{c.name}</h4>
-                    <p className="text-sm text-zinc-500">{c.description || 'Tidak ada deskripsi'}</p>
+                    <h4 className="font-black text-zinc-900">{c.name}</h4>
+                    <p className="text-sm font-medium text-zinc-500">{c.description || 'Tidak ada deskripsi'}</p>
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => deleteItem('categories', c.id)} className="text-zinc-400 hover:text-rose-600">
-                    <Trash2 className="h-4 w-4" />
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => deleteItem('categories', c.id)} 
+                    className="h-10 w-10 rounded-xl text-zinc-300 hover:text-rose-500 hover:bg-rose-50 transition-colors"
+                  >
+                    <Trash2 className="h-5 w-5" />
                   </Button>
                 </CardContent>
               </Card>
@@ -198,21 +220,21 @@ export default function Settings() {
         </TabsContent>
 
         {/* Recipes Tab */}
-        <TabsContent value="recipes" className="space-y-4">
+        <TabsContent value="recipes" className="space-y-6">
           <div className="flex justify-end">
-            <Button onClick={() => setIsRecipeDialogOpen(true)} className="gap-2">
-              <Plus className="h-4 w-4" /> Tambah Resep
+            <Button onClick={() => setIsRecipeDialogOpen(true)} className="h-12 px-6 rounded-xl font-bold gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+              <Plus className="h-5 w-5" /> Tambah Resep
             </Button>
           </div>
-          <Card className="border-none shadow-sm">
+          <Card className="border-none bg-white shadow-xl shadow-zinc-200/50 rounded-[2rem] overflow-hidden">
             <CardContent className="p-0">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-100 text-zinc-500">
-                    <th className="p-4 font-medium">Produk</th>
-                    <th className="p-4 font-medium">Bahan Baku</th>
-                    <th className="p-4 font-medium">Jumlah Dibutuhkan</th>
-                    <th className="p-4 text-right font-medium">Aksi</th>
+                  <tr className="border-b border-zinc-50 text-zinc-400">
+                    <th className="p-6 font-black uppercase tracking-widest text-[10px]">Produk</th>
+                    <th className="p-6 font-black uppercase tracking-widest text-[10px]">Bahan Baku</th>
+                    <th className="p-6 font-black uppercase tracking-widest text-[10px]">Jumlah Dibutuhkan</th>
+                    <th className="p-6 text-right font-black uppercase tracking-widest text-[10px]">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-50">
@@ -220,13 +242,22 @@ export default function Settings() {
                     const product = products.find(p => p.id === r.product_id);
                     const inv = inventory.find(i => i.id === r.inventory_item_id);
                     return (
-                      <tr key={r.id}>
-                        <td className="p-4 font-medium">{product?.name || 'Unknown'}</td>
-                        <td className="p-4">{inv?.name || 'Unknown'}</td>
-                        <td className="p-4">{r.quantity_required} {inv?.unit}</td>
-                        <td className="p-4 text-right">
-                          <Button variant="ghost" size="icon" onClick={() => deleteItem('recipes', r.id)} className="text-zinc-400 hover:text-rose-600">
-                            <Trash2 className="h-4 w-4" />
+                      <tr key={r.id} className="hover:bg-zinc-50/50 transition-colors">
+                        <td className="p-6 font-bold text-zinc-900">{product?.name || 'Unknown'}</td>
+                        <td className="p-6 font-medium text-zinc-600">{inv?.name || 'Unknown'}</td>
+                        <td className="p-6">
+                          <Badge className="bg-primary/10 text-primary border-none font-bold px-3 py-1 rounded-lg">
+                            {r.quantity_required} {inv?.unit}
+                          </Badge>
+                        </td>
+                        <td className="p-6 text-right">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => deleteItem('recipes', r.id)} 
+                            className="h-10 w-10 rounded-xl text-zinc-300 hover:text-rose-500 hover:bg-rose-50 transition-colors"
+                          >
+                            <Trash2 className="h-5 w-5" />
                           </Button>
                         </td>
                       </tr>
@@ -241,17 +272,17 @@ export default function Settings() {
 
       {/* Dialogs */}
       <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Tambah Produk</DialogTitle></DialogHeader>
-          <form onSubmit={handleAddProduct} className="space-y-4">
-            <div className="space-y-2">
-              <Label>Gambar Produk</Label>
-              <div className="flex items-center gap-4">
-                <div className="h-16 w-16 rounded-lg bg-zinc-100 overflow-hidden flex items-center justify-center border border-zinc-200">
+        <DialogContent className="rounded-[2rem] p-8">
+          <DialogHeader><DialogTitle className="text-2xl font-black">Tambah Produk</DialogTitle></DialogHeader>
+          <form onSubmit={handleAddProduct} className="space-y-6 mt-4">
+            <div className="space-y-3">
+              <Label className="text-sm font-bold text-zinc-700 ml-1">Gambar Produk</Label>
+              <div className="flex items-center gap-6">
+                <div className="h-24 w-24 rounded-3xl bg-zinc-50 overflow-hidden flex items-center justify-center border-2 border-dashed border-zinc-200 transition-all hover:border-primary/50">
                   {productForm.image_url ? (
-                    <img src={productForm.image_url} className="h-full w-full object-cover" />
+                    <img src={productForm.image_url} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
                   ) : (
-                    <Coffee className="h-8 w-8 text-zinc-300" />
+                    <Coffee className="h-10 w-10 text-zinc-200" />
                   )}
                 </div>
                 <div className="flex-1">
@@ -260,28 +291,46 @@ export default function Settings() {
                     accept="image/*" 
                     onChange={handleImageUpload} 
                     disabled={isUploading}
-                    className="cursor-pointer"
+                    className="h-12 rounded-xl border-zinc-200 cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-black file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
                   />
-                  {isUploading && <p className="text-xs text-zinc-500 mt-1 flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Mengunggah...</p>}
+                  {isUploading && <p className="text-xs font-bold text-primary mt-2 flex items-center gap-2"><Loader2 className="h-3 w-3 animate-spin" /> Mengunggah...</p>}
                 </div>
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Nama Produk</Label>
-              <Input value={productForm.name} onChange={e => setProductForm({...productForm, name: e.target.value})} required />
+              <Label className="text-sm font-bold text-zinc-700 ml-1">Nama Produk</Label>
+              <Input 
+                className="h-12 rounded-xl border-zinc-200 focus:ring-primary/20"
+                value={productForm.name} 
+                onChange={e => setProductForm({...productForm, name: e.target.value})} 
+                required 
+              />
             </div>
             <div className="space-y-2">
-              <Label>Harga</Label>
-              <Input type="number" value={productForm.price} onChange={e => setProductForm({...productForm, price: Number(e.target.value)})} required />
+              <Label className="text-sm font-bold text-zinc-700 ml-1">Harga</Label>
+              <Input 
+                type="number" 
+                className="h-12 rounded-xl border-zinc-200 focus:ring-primary/20"
+                value={productForm.price} 
+                onChange={e => setProductForm({...productForm, price: Number(e.target.value)})} 
+                required 
+              />
             </div>
             <div className="space-y-2">
-              <Label>Kategori</Label>
-              <select className="w-full rounded-md border p-2" value={productForm.category_id} onChange={e => setProductForm({...productForm, category_id: e.target.value})} required>
+              <Label className="text-sm font-bold text-zinc-700 ml-1">Kategori</Label>
+              <select 
+                className="w-full h-12 rounded-xl border border-zinc-200 bg-white px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20" 
+                value={productForm.category_id} 
+                onChange={e => setProductForm({...productForm, category_id: e.target.value})} 
+                required
+              >
                 <option value="">Pilih Kategori</option>
                 {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
-            <Button type="submit" className="w-full">Simpan</Button>
+            <Button type="submit" className="w-full h-14 text-lg font-black rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+              Simpan Produk
+            </Button>
           </form>
         </DialogContent>
       </Dialog>

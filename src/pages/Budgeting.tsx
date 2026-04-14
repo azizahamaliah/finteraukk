@@ -135,30 +135,30 @@ export default function Budgeting() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Budgeting</h1>
-          <p className="text-zinc-500">Kontrol anggaran dan pantau pengeluaran operasional.</p>
+          <h1 className="text-4xl font-black tracking-tight text-zinc-900">Budgeting</h1>
+          <p className="mt-1 text-lg font-medium text-zinc-500">Kontrol anggaran dan pantau pengeluaran operasional.</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-4">
           <Dialog open={isAddExpenseOpen} onOpenChange={setIsAddExpenseOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="gap-2">
-                <TrendingDown className="h-4 w-4" />
+            <DialogTrigger >
+              <Button variant="outline" className="h-12 px-6 rounded-xl font-bold gap-2 border-zinc-200 hover:bg-zinc-50 transition-all">
+                <TrendingDown className="h-5 w-5" />
                 Catat Pengeluaran
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="rounded-[2rem] p-8">
               <DialogHeader>
-                <DialogTitle>Catat Pengeluaran Baru</DialogTitle>
+                <DialogTitle className="text-2xl font-black">Catat Pengeluaran Baru</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleAddExpense} className="space-y-4 py-4">
+              <form onSubmit={handleAddExpense} className="space-y-6 mt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="exp_category">Kategori Budget</Label>
+                  <Label htmlFor="exp_category" className="text-sm font-bold text-zinc-700 ml-1">Kategori Budget</Label>
                   <select 
                     id="exp_category"
-                    className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+                    className="w-full h-12 rounded-xl border border-zinc-200 bg-white px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20"
                     value={expenseForm.category_id}
                     onChange={e => setExpenseForm({...expenseForm, category_id: e.target.value})}
                     required
@@ -170,57 +170,61 @@ export default function Budgeting() {
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="exp_amount">Jumlah (Rp)</Label>
+                  <Label htmlFor="exp_amount" className="text-sm font-bold text-zinc-700 ml-1">Jumlah (Rp)</Label>
                   <Input 
                     id="exp_amount" 
                     type="number" 
+                    className="h-12 rounded-xl border-zinc-200 focus:ring-primary/20"
                     value={expenseForm.amount} 
                     onChange={e => setExpenseForm({...expenseForm, amount: Number(e.target.value)})}
                     required 
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="exp_desc">Deskripsi</Label>
+                  <Label htmlFor="exp_desc" className="text-sm font-bold text-zinc-700 ml-1">Deskripsi</Label>
                   <Input 
                     id="exp_desc" 
+                    className="h-12 rounded-xl border-zinc-200 focus:ring-primary/20"
                     value={expenseForm.description} 
                     onChange={e => setExpenseForm({...expenseForm, description: e.target.value})}
                     required 
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="exp_date">Tanggal</Label>
+                  <Label htmlFor="exp_date" className="text-sm font-bold text-zinc-700 ml-1">Tanggal</Label>
                   <Input 
                     id="exp_date" 
                     type="date" 
+                    className="h-12 rounded-xl border-zinc-200 focus:ring-primary/20"
                     value={expenseForm.transaction_date} 
                     onChange={e => setExpenseForm({...expenseForm, transaction_date: e.target.value})}
                     required 
                   />
                 </div>
-                <DialogFooter>
-                  <Button type="submit" className="w-full">Simpan Pengeluaran</Button>
+                <DialogFooter className="pt-4">
+                  <Button type="submit" className="w-full h-14 text-lg font-black rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]">Simpan Pengeluaran</Button>
                 </DialogFooter>
               </form>
             </DialogContent>
           </Dialog>
 
           <Dialog open={isAddBudgetOpen} onOpenChange={setIsAddBudgetOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-2">
-                <Plus className="h-4 w-4" />
+            <DialogTrigger >
+              <Button className="h-12 px-6 rounded-xl font-bold gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                <Plus className="h-5 w-5" />
                 Set Budget
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="rounded-[2rem] p-8">
               <DialogHeader>
-                <DialogTitle>Set Anggaran Baru</DialogTitle>
+                <DialogTitle className="text-2xl font-black">Set Anggaran Baru</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleAddBudget} className="space-y-4 py-4">
+              <form onSubmit={handleAddBudget} className="space-y-6 mt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="bud_name">Nama Kategori</Label>
+                  <Label htmlFor="bud_name" className="text-sm font-bold text-zinc-700 ml-1">Nama Kategori</Label>
                   <Input 
                     id="bud_name" 
+                    className="h-12 rounded-xl border-zinc-200 focus:ring-primary/20"
                     placeholder="e.g. Marketing, Gaji, Sewa"
                     value={budgetForm.category_name} 
                     onChange={e => setBudgetForm({...budgetForm, category_name: e.target.value})}
@@ -228,17 +232,18 @@ export default function Budgeting() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="bud_limit">Limit Anggaran (Rp)</Label>
+                  <Label htmlFor="bud_limit" className="text-sm font-bold text-zinc-700 ml-1">Limit Anggaran (Rp)</Label>
                   <Input 
                     id="bud_limit" 
                     type="number" 
+                    className="h-12 rounded-xl border-zinc-200 focus:ring-primary/20"
                     value={budgetForm.limit_amount} 
                     onChange={e => setBudgetForm({...budgetForm, limit_amount: Number(e.target.value)})}
                     required 
                   />
                 </div>
-                <DialogFooter>
-                  <Button type="submit" className="w-full">Simpan Budget</Button>
+                <DialogFooter className="pt-4">
+                  <Button type="submit" className="w-full h-14 text-lg font-black rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]">Simpan Budget</Button>
                 </DialogFooter>
               </form>
             </DialogContent>
@@ -247,7 +252,7 @@ export default function Budgeting() {
       </div>
 
       {/* Budget Progress Cards */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-8 md:grid-cols-2">
         {budgets.map(budget => {
           const categoryExpenses = expenses
             .filter(e => e.category_id === budget.category_name)
@@ -256,51 +261,56 @@ export default function Budgeting() {
           const remaining = budget.limit_amount - categoryExpenses;
 
           return (
-            <Card key={budget.id} className="border-none shadow-sm overflow-hidden">
-              <CardHeader className="pb-2">
+            <Card key={budget.id} className="border-none bg-white shadow-xl shadow-zinc-200/50 rounded-[2rem] overflow-hidden group">
+              <CardHeader className="px-8 pt-8 pb-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">{budget.category_name}</CardTitle>
+                  <CardTitle className="text-xl font-black text-zinc-900">{budget.category_name}</CardTitle>
                   <Badge 
-                    variant="secondary" 
                     className={cn(
-                      usage >= 100 ? "bg-rose-100 text-rose-600" :
-                      usage >= 80 ? "bg-amber-100 text-amber-600" :
-                      "bg-emerald-100 text-emerald-600"
+                      "border-none font-black px-3 py-1 rounded-lg",
+                      usage >= 100 ? "bg-rose-500 text-white" :
+                      usage >= 80 ? "bg-amber-500 text-white" :
+                      "bg-primary text-white"
                     )}
                   >
                     {usage >= 100 ? 'Critical' : usage >= 80 ? 'Warning' : 'Aman'}
                   </Badge>
                 </div>
-                <CardDescription>
+                <CardDescription className="font-bold text-zinc-400 uppercase tracking-widest text-[10px]">
                   Periode {format(new Date(budget.period_year, budget.period_month - 1), 'MMMM yyyy', { locale: id })}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between text-sm">
-                  <span className="text-zinc-500">Terpakai: {formatCurrency(categoryExpenses)}</span>
-                  <span className="font-bold text-zinc-900">{Math.round(usage)}%</span>
+              <CardContent className="space-y-6 px-8 pb-8">
+                <div className="flex justify-between items-end">
+                  <div className="space-y-1">
+                    <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Terpakai</span>
+                    <div className="text-2xl font-black text-zinc-900">{formatCurrency(categoryExpenses)}</div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-3xl font-black text-primary">{Math.round(usage)}%</span>
+                  </div>
                 </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-100">
+                <div className="h-3 w-full overflow-hidden rounded-full bg-zinc-100">
                   <div 
                     className={cn(
-                      "h-full transition-all duration-500",
-                      usage >= 100 ? "bg-rose-500" :
-                      usage >= 80 ? "bg-amber-500" :
-                      "bg-emerald-500"
+                      "h-full transition-all duration-1000 ease-out rounded-full",
+                      usage >= 100 ? "bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.4)]" :
+                      usage >= 80 ? "bg-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.4)]" :
+                      "bg-primary shadow-[0_0_12px_rgba(32,182,111,0.4)]"
                     )}
                     style={{ width: `${Math.min(100, usage)}%` }}
                   />
                 </div>
-                <div className="flex items-center justify-between pt-2 border-t border-zinc-50">
+                <div className="flex items-center justify-between pt-6 border-t border-zinc-50">
                   <div className="flex flex-col">
-                    <span className="text-[10px] uppercase tracking-wider text-zinc-400">Limit</span>
-                    <span className="text-sm font-semibold">{formatCurrency(budget.limit_amount)}</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Limit Anggaran</span>
+                    <span className="text-lg font-black text-zinc-900">{formatCurrency(budget.limit_amount)}</span>
                   </div>
                   <div className="flex flex-col text-right">
-                    <span className="text-[10px] uppercase tracking-wider text-zinc-400">Sisa</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Sisa Saldo</span>
                     <span className={cn(
-                      "text-sm font-semibold",
-                      remaining < 0 ? "text-rose-500" : "text-emerald-600"
+                      "text-lg font-black",
+                      remaining < 0 ? "text-rose-500" : "text-primary"
                     )}>
                       {formatCurrency(remaining)}
                     </span>
@@ -313,31 +323,31 @@ export default function Budgeting() {
       </div>
 
       {/* Recent Expenses */}
-      <Card className="border-none shadow-sm">
-        <CardHeader>
-          <CardTitle>Pengeluaran Terbaru</CardTitle>
-          <CardDescription>Daftar biaya operasional yang telah dicatat.</CardDescription>
+      <Card className="border-none bg-white shadow-xl shadow-zinc-200/50 rounded-[2rem] overflow-hidden">
+        <CardHeader className="px-8 pt-8">
+          <CardTitle className="text-xl font-black">Pengeluaran Terbaru</CardTitle>
+          <CardDescription className="font-medium">Daftar biaya operasional yang telah dicatat.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-8 pb-8">
           <div className="relative overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-zinc-100 text-zinc-500">
-                  <th className="pb-3 font-medium">Kategori</th>
-                  <th className="pb-3 font-medium">Deskripsi</th>
-                  <th className="pb-3 font-medium">Tanggal</th>
-                  <th className="pb-3 text-right font-medium">Jumlah</th>
+                <tr className="border-b border-zinc-50 text-zinc-400">
+                  <th className="pb-4 font-black uppercase tracking-widest text-[10px]">Kategori</th>
+                  <th className="pb-4 font-black uppercase tracking-widest text-[10px]">Deskripsi</th>
+                  <th className="pb-4 font-black uppercase tracking-widest text-[10px]">Tanggal</th>
+                  <th className="pb-4 text-right font-black uppercase tracking-widest text-[10px]">Jumlah</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-50">
                 {expenses.slice(0, 10).map((e) => (
-                  <tr key={e.id} className="group hover:bg-zinc-50/50">
-                    <td className="py-4">
-                      <Badge variant="outline" className="font-medium">{e.category_id}</Badge>
+                  <tr key={e.id} className="group hover:bg-zinc-50/50 transition-colors">
+                    <td className="py-5">
+                      <Badge className="bg-zinc-100 text-zinc-600 border-none font-bold px-3 py-1 rounded-lg">{e.category_id}</Badge>
                     </td>
-                    <td className="py-4 text-zinc-600">{e.description}</td>
-                    <td className="py-4 text-zinc-500">{format(new Date(e.transaction_date), 'dd MMM yyyy', { locale: id })}</td>
-                    <td className="py-4 text-right font-semibold text-rose-600">
+                    <td className="py-5 font-bold text-zinc-900">{e.description}</td>
+                    <td className="py-5 font-medium text-zinc-500">{format(new Date(e.transaction_date), 'dd MMM yyyy', { locale: id })}</td>
+                    <td className="py-5 text-right font-black text-rose-500 text-lg">
                       - {formatCurrency(e.amount)}
                     </td>
                   </tr>

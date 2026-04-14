@@ -111,47 +111,48 @@ export default function Inventory() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Inventory</h1>
-          <p className="text-zinc-500">Kelola stok bahan baku dan pantau ketersediaan.</p>
+          <h1 className="text-4xl font-black tracking-tight text-zinc-900">Inventory</h1>
+          <p className="mt-1 text-lg font-medium text-zinc-500">Kelola stok bahan baku dan pantau ketersediaan.</p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger>
-            <Button className="gap-2" onClick={() => {
+            <Button className="h-12 px-6 rounded-xl font-bold gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]" onClick={() => {
               setIsEditing(null);
               setFormData({ name: '', unit: 'GRAM', current_stock: 0, min_stock_level: 0, unit_cost: 0 });
             }}>
-              <Plus className="h-4 w-4" />
+              <Plus className="h-5 w-5" />
               Tambah Bahan
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="rounded-[2rem] p-8">
             <DialogHeader>
-              <DialogTitle>{isEditing ? 'Edit Bahan Baku' : 'Tambah Bahan Baku Baru'}</DialogTitle>
+              <DialogTitle className="text-2xl font-black">{isEditing ? 'Edit Bahan Baku' : 'Tambah Bahan Baku Baru'}</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4 py-4">
+            <form onSubmit={handleSubmit} className="space-y-6 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Nama Bahan</Label>
+                <Label htmlFor="name" className="text-sm font-bold text-zinc-700 ml-1">Nama Bahan</Label>
                 <Input 
                   id="name" 
+                  className="h-12 rounded-xl border-zinc-200 focus:ring-primary/20"
                   value={formData.name} 
                   onChange={e => setFormData({...formData, name: e.target.value})}
                   required 
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="unit">Satuan</Label>
+                  <Label htmlFor="unit" className="text-sm font-bold text-zinc-700 ml-1">Satuan</Label>
                   <Select 
                     value={formData.unit} 
                     onValueChange={v => setFormData({...formData, unit: v as any})}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="h-12 rounded-xl border-zinc-200 focus:ring-primary/20">
                       <SelectValue placeholder="Pilih satuan" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-xl">
                       {['KG', 'GRAM', 'LITER', 'ML', 'PCS', 'UNIT'].map(u => (
                         <SelectItem key={u} value={u}>{u}</SelectItem>
                       ))}
@@ -159,40 +160,43 @@ export default function Inventory() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="unit_cost">Biaya per Satuan</Label>
+                  <Label htmlFor="unit_cost" className="text-sm font-bold text-zinc-700 ml-1">Biaya per Satuan</Label>
                   <Input 
                     id="unit_cost" 
                     type="number" 
+                    className="h-12 rounded-xl border-zinc-200 focus:ring-primary/20"
                     value={formData.unit_cost} 
                     onChange={e => setFormData({...formData, unit_cost: Number(e.target.value)})}
                     required 
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="current_stock">Stok Saat Ini</Label>
+                  <Label htmlFor="current_stock" className="text-sm font-bold text-zinc-700 ml-1">Stok Saat Ini</Label>
                   <Input 
                     id="current_stock" 
                     type="number" 
+                    className="h-12 rounded-xl border-zinc-200 focus:ring-primary/20"
                     value={formData.current_stock} 
                     onChange={e => setFormData({...formData, current_stock: Number(e.target.value)})}
                     required 
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="min_stock_level">Batas Minimum</Label>
+                  <Label htmlFor="min_stock_level" className="text-sm font-bold text-zinc-700 ml-1">Batas Minimum</Label>
                   <Input 
                     id="min_stock_level" 
                     type="number" 
+                    className="h-12 rounded-xl border-zinc-200 focus:ring-primary/20"
                     value={formData.min_stock_level} 
                     onChange={e => setFormData({...formData, min_stock_level: Number(e.target.value)})}
                     required 
                   />
                 </div>
               </div>
-              <DialogFooter>
-                <Button type="submit" className="w-full">
+              <DialogFooter className="pt-4">
+                <Button type="submit" className="w-full h-14 text-lg font-black rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]">
                   {isEditing ? 'Simpan Perubahan' : 'Tambah Bahan'}
                 </Button>
               </DialogFooter>
@@ -203,20 +207,20 @@ export default function Inventory() {
 
       {/* Alert Section */}
       {lowStockItems.length > 0 && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {lowStockItems.map(item => (
-            <Card key={item.id} className="border-rose-100 bg-rose-50/50 shadow-none">
-              <CardContent className="flex items-center gap-4 p-4">
-                <div className="rounded-full bg-rose-100 p-2 text-rose-600">
-                  <AlertTriangle className="h-5 w-5" />
+            <Card key={item.id} className="border-none bg-rose-50/50 shadow-xl shadow-rose-100/20 rounded-[2rem] overflow-hidden">
+              <CardContent className="flex items-center gap-4 p-6">
+                <div className="rounded-2xl bg-rose-500 p-3 text-white shadow-lg shadow-rose-200">
+                  <AlertTriangle className="h-6 w-6" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-rose-900">{item.name} Hampir Habis!</h4>
-                  <p className="text-xs text-rose-600">
-                    Stok: {item.current_stock} {item.unit} (Min: {item.min_stock_level})
+                  <h4 className="font-black text-rose-900">{item.name} Hampir Habis!</h4>
+                  <p className="text-sm font-bold text-rose-600/70">
+                    Stok: {item.current_stock} {item.unit}
                   </p>
                 </div>
-                <Button variant="outline" size="sm" className="border-rose-200 bg-white text-rose-600 hover:bg-rose-50">
+                <Button variant="outline" size="sm" className="rounded-xl font-bold border-rose-200 bg-white text-rose-600 hover:bg-rose-50">
                   Restock
                 </Button>
               </CardContent>
@@ -226,67 +230,67 @@ export default function Inventory() {
       )}
 
       {/* Inventory Table */}
-      <Card className="border-none shadow-sm">
-        <CardHeader className="flex flex-row items-center justify-between">
+      <Card className="border-none bg-white shadow-xl shadow-zinc-200/50 rounded-[2rem] overflow-hidden">
+        <CardHeader className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between px-8 pt-8">
           <div>
-            <CardTitle>Daftar Inventaris</CardTitle>
-            <CardDescription>Total {items.length} jenis bahan baku terdaftar.</CardDescription>
+            <CardTitle className="text-xl font-black">Daftar Inventaris</CardTitle>
+            <CardDescription className="font-medium">Total {items.length} jenis bahan baku terdaftar.</CardDescription>
           </div>
-          <div className="relative w-64">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+          <div className="relative w-full sm:w-80">
+            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />
             <Input 
               placeholder="Cari bahan..." 
-              className="pl-10"
+              className="h-12 pl-12 rounded-2xl border-zinc-200 bg-zinc-50/50 focus:ring-primary/20"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
             />
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-8 pb-8">
           <div className="relative overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-zinc-100 text-zinc-500">
-                  <th className="pb-3 font-medium">Bahan</th>
-                  <th className="pb-3 font-medium">Stok Saat Ini</th>
-                  <th className="pb-3 font-medium">Satuan</th>
-                  <th className="pb-3 font-medium">Biaya/Unit</th>
-                  <th className="pb-3 font-medium">Status</th>
-                  <th className="pb-3 text-right font-medium">Aksi</th>
+                <tr className="border-b border-zinc-50 text-zinc-400">
+                  <th className="pb-4 font-black uppercase tracking-widest text-[10px]">Bahan</th>
+                  <th className="pb-4 font-black uppercase tracking-widest text-[10px]">Stok Saat Ini</th>
+                  <th className="pb-4 font-black uppercase tracking-widest text-[10px]">Satuan</th>
+                  <th className="pb-4 font-black uppercase tracking-widest text-[10px]">Biaya/Unit</th>
+                  <th className="pb-4 font-black uppercase tracking-widest text-[10px]">Status</th>
+                  <th className="pb-4 text-right font-black uppercase tracking-widest text-[10px]">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-50">
                 {filteredItems.map((item) => (
-                  <tr key={item.id} className="group hover:bg-zinc-50/50">
-                    <td className="py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="rounded-lg bg-zinc-100 p-2 text-zinc-500">
-                          <Package className="h-4 w-4" />
+                  <tr key={item.id} className="group hover:bg-zinc-50/50 transition-colors">
+                    <td className="py-5">
+                      <div className="flex items-center gap-4">
+                        <div className="rounded-xl bg-zinc-100 p-2.5 text-zinc-500 group-hover:bg-white group-hover:shadow-sm transition-colors">
+                          <Package className="h-5 w-5" />
                         </div>
-                        <span className="font-medium text-zinc-900">{item.name}</span>
+                        <span className="font-black text-zinc-900">{item.name}</span>
                       </div>
                     </td>
-                    <td className="py-4 font-medium text-zinc-900">{item.current_stock}</td>
-                    <td className="py-4 text-zinc-500">{item.unit}</td>
-                    <td className="py-4 text-zinc-500">{formatCurrency(item.unit_cost)}</td>
-                    <td className="py-4">
+                    <td className="py-5 font-black text-zinc-900 text-lg">{item.current_stock}</td>
+                    <td className="py-5 font-bold text-zinc-500">{item.unit}</td>
+                    <td className="py-5 font-bold text-zinc-500">{formatCurrency(item.unit_cost)}</td>
+                    <td className="py-5">
                       <Badge 
-                        variant="secondary" 
                         className={cn(
+                          "border-none font-bold px-3 py-1 rounded-lg",
                           item.current_stock <= item.min_stock_level 
                             ? "bg-rose-100 text-rose-600" 
-                            : "bg-emerald-100 text-emerald-600"
+                            : "bg-primary/10 text-primary"
                         )}
                       >
                         {item.current_stock <= item.min_stock_level ? 'Low Stock' : 'In Stock'}
                       </Badge>
                     </td>
-                    <td className="py-4 text-right">
+                    <td className="py-5 text-right">
                       <div className="flex justify-end gap-2">
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="h-8 w-8 text-zinc-400 hover:text-zinc-900"
+                          className="h-10 w-10 rounded-xl text-zinc-300 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
                           onClick={() => {
                             setIsEditing(item);
                             setFormData({
@@ -299,15 +303,15 @@ export default function Inventory() {
                             setIsAddDialogOpen(true);
                           }}
                         >
-                          <Edit2 className="h-4 w-4" />
+                          <Edit2 className="h-5 w-5" />
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          className="h-8 w-8 text-zinc-400 hover:text-rose-600"
+                          className="h-10 w-10 rounded-xl text-zinc-300 hover:text-rose-500 hover:bg-rose-50 transition-colors"
                           onClick={() => handleDelete(item.id)}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-5 w-5" />
                         </Button>
                       </div>
                     </td>

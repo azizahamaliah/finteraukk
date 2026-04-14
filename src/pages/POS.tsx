@@ -147,25 +147,28 @@ export default function POS() {
   };
 
   return (
-    <div className="flex h-full gap-6 overflow-hidden">
+    <div className="flex h-[calc(100vh-12rem)] gap-8 overflow-hidden">
       {/* Product Selection Area */}
-      <div className="flex flex-1 flex-col gap-6 overflow-hidden">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-1 flex-col gap-8 overflow-hidden">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />
             <Input 
-              placeholder="Cari produk..." 
-              className="pl-10"
+              placeholder="Cari menu favorit..." 
+              className="h-12 pl-12 rounded-2xl border-zinc-200 bg-white shadow-sm focus:ring-primary/20"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
+          <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
             <Button 
               variant={selectedCategory === 'all' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setSelectedCategory('all')}
-              className="whitespace-nowrap"
+              className={cn(
+                "h-10 px-6 rounded-xl font-bold transition-all",
+                selectedCategory === 'all' ? "shadow-lg shadow-primary/20" : "bg-white border-zinc-200 text-zinc-500 hover:bg-zinc-50"
+              )}
             >
               Semua
             </Button>
@@ -175,7 +178,10 @@ export default function POS() {
                 variant={selectedCategory === cat.id ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setSelectedCategory(cat.id)}
-                className="whitespace-nowrap"
+                className={cn(
+                  "h-10 px-6 rounded-xl font-bold transition-all whitespace-nowrap",
+                  selectedCategory === cat.id ? "shadow-lg shadow-primary/20" : "bg-white border-zinc-200 text-zinc-500 hover:bg-zinc-50"
+                )}
               >
                 {cat.name}
               </Button>
@@ -183,31 +189,37 @@ export default function POS() {
           </div>
         </div>
 
-        <ScrollArea className="flex-1">
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <ScrollArea className="flex-1 pr-4">
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
             {filteredProducts.map(product => (
               <Card 
                 key={product.id} 
-                className="group cursor-pointer overflow-hidden border-none shadow-sm transition-all hover:ring-2 hover:ring-zinc-900"
+                className="group cursor-pointer overflow-hidden border-none bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-zinc-200/50 active:scale-95"
                 onClick={() => addToCart(product)}
               >
-                <div className="aspect-square bg-zinc-100">
+                <div className="relative aspect-[4/3] overflow-hidden bg-zinc-100">
                   {product.image_url ? (
                     <img 
                       src={product.image_url} 
                       alt={product.name} 
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                       referrerPolicy="no-referrer"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-zinc-300">
-                      <ShoppingCart className="h-12 w-12" />
+                      <ShoppingCart className="h-12 w-12 opacity-20" />
                     </div>
                   )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
                 </div>
-                <CardContent className="p-3">
-                  <h3 className="truncate font-semibold text-zinc-900">{product.name}</h3>
-                  <p className="mt-1 text-sm font-bold text-zinc-900">{formatCurrency(product.price)}</p>
+                <CardContent className="p-4">
+                  <h3 className="truncate font-bold text-zinc-900">{product.name}</h3>
+                  <div className="mt-2 flex items-center justify-between">
+                    <p className="text-lg font-black text-primary">{formatCurrency(product.price)}</p>
+                    <div className="rounded-lg bg-primary/10 p-1.5 text-primary opacity-0 transition-all group-hover:opacity-100">
+                      <Plus className="h-4 w-4" />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             ))}
@@ -216,22 +228,22 @@ export default function POS() {
       </div>
 
       {/* Cart Area */}
-      <Card className="flex w-96 flex-col border-none shadow-lg">
-        <CardHeader className="border-b border-zinc-100">
-          <CardTitle className="flex items-center justify-between">
+      <Card className="flex w-[400px] flex-col border-none bg-white shadow-2xl shadow-zinc-200/50 rounded-[2rem] overflow-hidden ring-1 ring-zinc-100">
+        <CardHeader className="px-8 py-6 border-b border-zinc-50">
+          <CardTitle className="flex items-center justify-between text-xl font-black">
             Keranjang
-            <Badge variant="secondary" className="bg-zinc-100 text-zinc-600">
+            <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-3 py-1 rounded-lg">
               {cart.reduce((sum, item) => sum + item.quantity, 0)} Item
             </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-1 flex-col p-0">
-          <ScrollArea className="flex-1 p-4">
+          <ScrollArea className="flex-1 px-8 py-6">
             {cart.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {cart.map(item => (
-                  <div key={item.product.id} className="flex items-center gap-3">
-                    <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-zinc-100">
+                  <div key={item.product.id} className="flex items-center gap-4 group">
+                    <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-2xl bg-zinc-100 ring-1 ring-zinc-100">
                       {item.product.image_url ? (
                         <img 
                           src={item.product.image_url} 
@@ -246,71 +258,71 @@ export default function POS() {
                       )}
                     </div>
                     <div className="flex-1 overflow-hidden">
-                      <h4 className="truncate text-sm font-medium text-zinc-900">{item.product.name}</h4>
-                      <p className="text-xs text-zinc-500">{formatCurrency(item.product.price)}</p>
+                      <h4 className="truncate text-sm font-bold text-zinc-900">{item.product.name}</h4>
+                      <p className="text-xs font-bold text-primary">{formatCurrency(item.product.price)}</p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3 bg-zinc-50 rounded-xl p-1">
                       <Button 
-                        variant="outline" 
+                        variant="ghost" 
                         size="icon" 
-                        className="h-7 w-7 rounded-full"
+                        className="h-8 w-8 rounded-lg bg-white shadow-sm hover:bg-zinc-100"
                         onClick={() => updateQuantity(item.product.id, -1)}
                       >
                         <Minus className="h-3 w-3" />
                       </Button>
-                      <span className="w-4 text-center text-sm font-medium">{item.quantity}</span>
+                      <span className="w-4 text-center text-sm font-black">{item.quantity}</span>
                       <Button 
-                        variant="outline" 
+                        variant="ghost" 
                         size="icon" 
-                        className="h-7 w-7 rounded-full"
+                        className="h-8 w-8 rounded-lg bg-white shadow-sm hover:bg-zinc-100"
                         onClick={() => updateQuantity(item.product.id, 1)}
                       >
                         <Plus className="h-3 w-3" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-7 w-7 text-rose-500 hover:bg-rose-50 hover:text-rose-600"
-                        onClick={() => removeFromCart(item.product.id)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
                     </div>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-zinc-300 hover:text-rose-500 hover:bg-rose-50 transition-colors"
+                      onClick={() => removeFromCart(item.product.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="rounded-full bg-zinc-100 p-4">
-                  <ShoppingCart className="h-8 w-8 text-zinc-400" />
+                <div className="rounded-3xl bg-zinc-50 p-8">
+                  <ShoppingCart className="h-12 w-12 text-zinc-200" />
                 </div>
-                <p className="mt-4 text-sm text-zinc-500">Keranjang masih kosong.</p>
+                <p className="mt-6 text-sm font-bold text-zinc-400 uppercase tracking-widest">Keranjang Kosong</p>
               </div>
             )}
           </ScrollArea>
 
-          <div className="border-t border-zinc-100 bg-zinc-50/50 p-6 space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm text-zinc-500">
+          <div className="bg-zinc-50/50 px-8 py-8 space-y-6 border-t border-zinc-100">
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm font-bold text-zinc-400">
                 <span>Subtotal</span>
                 <span>{formatCurrency(total)}</span>
               </div>
-              <div className="flex justify-between text-sm text-zinc-500">
+              <div className="flex justify-between text-sm font-bold text-zinc-400">
                 <span>Pajak (10%)</span>
                 <span>{formatCurrency(tax)}</span>
               </div>
-              <div className="flex justify-between text-lg font-bold text-zinc-900 pt-2 border-t border-zinc-200">
+              <div className="flex justify-between text-2xl font-black text-zinc-900 pt-4 border-t border-zinc-200">
                 <span>Total</span>
                 <span>{formatCurrency(grandTotal)}</span>
               </div>
             </div>
             <Button 
-              className="w-full h-12 text-lg font-bold gap-2" 
+              className="w-full h-16 text-xl font-black gap-3 rounded-2xl shadow-xl shadow-primary/30 transition-all hover:scale-[1.02] active:scale-[0.98]" 
               disabled={cart.length === 0}
               onClick={() => setIsCheckoutOpen(true)}
             >
               Bayar Sekarang
-              <ArrowRight className="h-5 w-5" />
+              <ArrowRight className="h-6 w-6" />
             </Button>
           </div>
         </CardContent>

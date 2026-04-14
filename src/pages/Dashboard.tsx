@@ -1,120 +1,142 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
-  TrendingUp, 
-  TrendingDown, 
-  Wallet, 
-  AlertCircle, 
-  CheckCircle2, 
-  Info,
+  Search, 
+  Plus, 
+  Minus, 
+  Trash2, 
+  CreditCard, 
+  Banknote, 
+  QrCode, 
   ArrowRight,
-  Sparkles,
-  Loader2
+  Loader2,
+  CheckCircle2,
+  ShoppingCart
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  BarChart,
-  Bar
-} from 'recharts';
-import { format, subDays, startOfMonth, endOfMonth } from 'date-fns';
-import { id } from 'date-fns/locale';
-import { Transaction, AIInsight, Expense } from '../types';
-import { Button } from '@/components/ui/button';
-import { motion, AnimatePresence } from 'motion/react';
+import { Product, Category, Transaction, TransactionItem, Recipe, InventoryItem } from '../types';
 import { cn } from '@/lib/utils';
-import { generateFinancialInsight } from '../services/aiService';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { dataService } from '../services/dataService';
+import { authService } from '../services/authService';
 
-export default function Dashboard() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [insights, setInsights] = useState<AIInsight[]>([]);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isGenerating, setIsGenerating] = useState(false);
-
-  const handleGenerateInsight = async () => {
-    setIsGenerating(true);
-    try {
-      const data = {
-        transactions: transactions.slice(0, 20),
-        expenses: expenses.slice(0, 20),
-        summary: {
-          revenue: totalRevenue,
-          expenses: totalExpenses,
-          profit: netProfit
-        }
-      };
-      const insight = await generateFinancialInsight(data);
-      if (insight) {
-        await dataService.addInsight({
-          ...insight,
-          is_read: false,
-          created_at: new Date().toISOString()
-        });
-        const updatedInsights = await dataService.getInsights();
-        setInsights(updatedInsights);
-        toast.success('Insight baru berhasil dibuat!');
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error('Gagal membuat insight.');
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+export default function POS() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [cart, setCart] = useState<{ product: Product; quantity: number }[]>([]);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'CARD' | 'QRIS' | 'TRANSFER'>('CASH');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [t, i, e] = await Promise.all([
-          dataService.getTransactions(),
-          dataService.getInsights(),
-          dataService.getExpenses()
+        const [p, c, r] = await Promise.all([
+          dataService.getProducts(),
+          dataService.getCategories(),
+          dataService.getRecipes()
         ]);
-        setTransactions(t);
-        setInsights(i);
-        setExpenses(e);
+        setProducts(p);
+        setCategories(c);
+        setRecipes(r);
       } catch (error) {
-        console.error('Error loading dashboard data:', error);
-      } finally {
-        setLoading(false);
+        console.error('Error loading POS data:', error);
       }
     };
-
     loadData();
   }, []);
 
-  const totalRevenue = transactions
-    .filter(t => t.status === 'SUCCESS')
-    .reduce((sum, t) => sum + t.total_amount, 0);
-
-  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
-  const netProfit = totalRevenue - totalExpenses;
-
-  const chartData = Array.from({ length: 7 }).map((_, i) => {
-    const date = subDays(new Date(), 6 - i);
-    const dateStr = format(date, 'yyyy-MM-dd');
-    const dayRevenue = transactions
-      .filter(t => t.status === 'SUCCESS' && t.created_at.startsWith(dateStr))
-      .reduce((sum, t) => sum + t.total_amount, 0);
-    const dayExpense = expenses
-      .filter(e => e.transaction_date === dateStr)
-      .reduce((sum, e) => sum + e.amount, 0);
-    
-    return {
-      name: format(date, 'EEE', { locale: id }),
-      revenue: dayRevenue,
-      expense: dayExpense,
-    };
+  const filteredProducts = products.filter(p => {
+    const matchesCategory = selectedCategory === 'all' || p.category_id === selectedCategory;
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch && p.is_active;
   });
+
+  const addToCart = (product: Product) => {
+    setCart(prev => {
+      const existing = prev.find(item => item.product.id === product.id);
+      if (existing) {
+        return prev.map(item => 
+          item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        );
+      }
+      return [...prev, { product, quantity: 1 }];
+    });
+  };
+
+  const removeFromCart = (productId: string) => {
+    setCart(prev => prev.filter(item => item.product.id !== productId));
+  };
+
+  const updateQuantity = (productId: string, delta: number) => {
+    setCart(prev => prev.map(item => {
+      if (item.product.id === productId) {
+        const newQty = Math.max(1, item.quantity + delta);
+        return { ...item, quantity: newQty };
+      }
+      return item;
+    }));
+  };
+
+  const total = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  const tax = total * 0.1; // 10% tax
+  const grandTotal = total + tax;
+
+  const handleCheckout = async () => {
+    if (cart.length === 0) return;
+    setIsProcessing(true);
+
+    try {
+      const orderNumber = `ORD-${new Date().getTime()}`;
+      
+      const transactionItems = cart.map(item => ({
+        product_id: item.product.id,
+        quantity: item.quantity,
+        unit_price: item.product.price,
+        subtotal: item.product.price * item.quantity
+      }));
+
+      // 1. Create Transaction
+      await dataService.addTransaction({
+        order_number: orderNumber,
+        total_amount: grandTotal,
+        tax_amount: tax,
+        payment_method: paymentMethod,
+        status: 'SUCCESS',
+        created_at: new Date().toISOString()
+      }, transactionItems);
+
+      // 2. Update Inventory
+      const inventory = await dataService.getInventory();
+      for (const item of cart) {
+        const productRecipes = recipes.filter(r => r.product_id === item.product.id);
+        for (const recipe of productRecipes) {
+          const invItem = inventory.find(i => i.id === recipe.inventory_item_id);
+          if (invItem) {
+            await dataService.updateInventoryItem(invItem.id, {
+              current_stock: invItem.current_stock - (recipe.quantity_required * item.quantity)
+            });
+          }
+        }
+      }
+
+      toast.success('Transaksi Berhasil!');
+      setCart([]);
+      setIsCheckoutOpen(false);
+    } catch (error) {
+      console.error(error);
+      toast.error('Gagal memproses transaksi.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -125,244 +147,252 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Dashboard</h1>
-          <p className="text-zinc-500">Ringkasan performa bisnis Anda hari ini.</p>
+    <div className="flex h-[calc(100vh-12rem)] gap-8 overflow-hidden">
+      {/* Product Selection Area */}
+      <div className="flex flex-1 flex-col gap-8 overflow-hidden">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />
+            <Input 
+              placeholder="Cari menu favorit..." 
+              className="h-12 pl-12 rounded-2xl border-zinc-200 bg-white shadow-sm focus:ring-primary/20"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 no-scrollbar">
+            <Button 
+              variant={selectedCategory === 'all' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSelectedCategory('all')}
+              className={cn(
+                "h-10 px-6 rounded-xl font-bold transition-all",
+                selectedCategory === 'all' ? "shadow-lg shadow-primary/20" : "bg-white border-zinc-200 text-zinc-500 hover:bg-zinc-50"
+              )}
+            >
+              Semua
+            </Button>
+            {categories.map(cat => (
+              <Button 
+                key={cat.id}
+                variant={selectedCategory === cat.id ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedCategory(cat.id)}
+                className={cn(
+                  "h-10 px-6 rounded-xl font-bold transition-all whitespace-nowrap",
+                  selectedCategory === cat.id ? "shadow-lg shadow-primary/20" : "bg-white border-zinc-200 text-zinc-500 hover:bg-zinc-50"
+                )}
+              >
+                {cat.name}
+              </Button>
+            ))}
+          </div>
         </div>
-        <Badge variant="outline" className="px-3 py-1 text-sm font-medium">
-          {format(new Date(), 'dd MMMM yyyy', { locale: id })}
-        </Badge>
+
+        <ScrollArea className="flex-1 pr-4">
+          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
+            {filteredProducts.map(product => (
+              <Card 
+                key={product.id} 
+                className="group cursor-pointer overflow-hidden border-none bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-zinc-200/50 active:scale-95"
+                onClick={() => addToCart(product)}
+              >
+                <div className="relative aspect-[4/3] overflow-hidden bg-zinc-100">
+                  {product.image_url ? (
+                    <img 
+                      src={product.image_url} 
+                      alt={product.name} 
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-zinc-300">
+                      <ShoppingCart className="h-12 w-12 opacity-20" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                </div>
+                <CardContent className="p-4">
+                  <h3 className="truncate font-bold text-zinc-900">{product.name}</h3>
+                  <div className="mt-2 flex items-center justify-between">
+                    <p className="text-lg font-black text-primary">{formatCurrency(product.price)}</p>
+                    <div className="rounded-lg bg-primary/10 p-1.5 text-primary opacity-0 transition-all group-hover:opacity-100">
+                      <Plus className="h-4 w-4" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </ScrollArea>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-none shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-zinc-500">Total Pendapatan</CardTitle>
-            <TrendingUp className="h-4 w-4 text-emerald-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalRevenue)}</div>
-            <p className="text-xs text-zinc-400 mt-1">Bulan ini</p>
-          </CardContent>
-        </Card>
-        <Card className="border-none shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-zinc-500">Total Pengeluaran</CardTitle>
-            <TrendingDown className="h-4 w-4 text-rose-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalExpenses)}</div>
-            <p className="text-xs text-zinc-400 mt-1">Bulan ini</p>
-          </CardContent>
-        </Card>
-        <Card className="border-none shadow-sm bg-zinc-900 text-white">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-zinc-400">Laba Bersih</CardTitle>
-            <Wallet className="h-4 w-4 text-zinc-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(netProfit)}</div>
-            <p className="text-xs text-zinc-500 mt-1">Estimasi keuntungan</p>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Cart Area */}
+      <Card className="flex w-[400px] flex-col border-none bg-white shadow-2xl shadow-zinc-200/50 rounded-[2rem] overflow-hidden ring-1 ring-zinc-100">
+        <CardHeader className="px-8 py-6 border-b border-zinc-50">
+          <CardTitle className="flex items-center justify-between text-xl font-black">
+            Keranjang
+            <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-3 py-1 rounded-lg">
+              {cart.reduce((sum, item) => sum + item.quantity, 0)} Item
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-1 flex-col p-0">
+          <ScrollArea className="flex-1 px-8 py-6">
+            {cart.length > 0 ? (
+              <div className="space-y-6">
+                {cart.map(item => (
+                  <div key={item.product.id} className="flex items-center gap-4 group">
+                    <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-2xl bg-zinc-100 ring-1 ring-zinc-100">
+                      {item.product.image_url ? (
+                        <img 
+                          src={item.product.image_url} 
+                          alt={item.product.name} 
+                          className="h-full w-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-zinc-300">
+                          <ShoppingCart className="h-6 w-6" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <h4 className="truncate text-sm font-bold text-zinc-900">{item.product.name}</h4>
+                      <p className="text-xs font-bold text-primary">{formatCurrency(item.product.price)}</p>
+                    </div>
+                    <div className="flex items-center gap-3 bg-zinc-50 rounded-xl p-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 rounded-lg bg-white shadow-sm hover:bg-zinc-100"
+                        onClick={() => updateQuantity(item.product.id, -1)}
+                      >
+                        <Minus className="h-3 w-3" />
+                      </Button>
+                      <span className="w-4 text-center text-sm font-black">{item.quantity}</span>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 rounded-lg bg-white shadow-sm hover:bg-zinc-100"
+                        onClick={() => updateQuantity(item.product.id, 1)}
+                      >
+                        <Plus className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-zinc-300 hover:text-rose-500 hover:bg-rose-50 transition-colors"
+                      onClick={() => removeFromCart(item.product.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <div className="rounded-3xl bg-zinc-50 p-8">
+                  <ShoppingCart className="h-12 w-12 text-zinc-200" />
+                </div>
+                <p className="mt-6 text-sm font-bold text-zinc-400 uppercase tracking-widest">Keranjang Kosong</p>
+              </div>
+            )}
+          </ScrollArea>
 
-      <div className="grid gap-6 lg:grid-cols-7">
-        {/* Main Chart */}
-        <Card className="lg:col-span-4 border-none shadow-sm">
-          <CardHeader>
-            <CardTitle>Arus Kas</CardTitle>
-            <CardDescription>Perbandingan pendapatan dan pengeluaran 7 hari terakhir.</CardDescription>
-          </CardHeader>
-          <CardContent className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                <XAxis 
-                  dataKey="name" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fill: '#71717a', fontSize: 12 }}
-                />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fill: '#71717a', fontSize: 12 }}
-                  tickFormatter={(value) => `Rp${value/1000}k`}
-                />
-                <Tooltip 
-                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                  formatter={(value: number) => formatCurrency(value)}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="revenue" 
-                  stroke="#10b981" 
-                  fillOpacity={1} 
-                  fill="url(#colorRevenue)" 
-                  strokeWidth={2}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="expense" 
-                  stroke="#f43f5e" 
-                  fillOpacity={1} 
-                  fill="url(#colorExpense)" 
-                  strokeWidth={2}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* AI Insights */}
-        <Card className="lg:col-span-3 border-none shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-amber-500" />
-                AI Insights
-              </CardTitle>
-              <CardDescription>Analisis cerdas untuk bisnis Anda.</CardDescription>
+          <div className="bg-zinc-50/50 px-8 py-8 space-y-6 border-t border-zinc-100">
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm font-bold text-zinc-400">
+                <span>Subtotal</span>
+                <span>{formatCurrency(total)}</span>
+              </div>
+              <div className="flex justify-between text-sm font-bold text-zinc-400">
+                <span>Pajak (10%)</span>
+                <span>{formatCurrency(tax)}</span>
+              </div>
+              <div className="flex justify-between text-2xl font-black text-zinc-900 pt-4 border-t border-zinc-200">
+                <span>Total</span>
+                <span>{formatCurrency(grandTotal)}</span>
+              </div>
             </div>
             <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8 text-zinc-400 hover:text-amber-500"
-              onClick={handleGenerateInsight}
-              disabled={isGenerating}
+              className="w-full h-16 text-xl font-black gap-3 rounded-2xl shadow-xl shadow-primary/30 transition-all hover:scale-[1.02] active:scale-[0.98]" 
+              disabled={cart.length === 0}
+              onClick={() => setIsCheckoutOpen(true)}
             >
-              {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              Bayar Sekarang
+              <ArrowRight className="h-6 w-6" />
             </Button>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <AnimatePresence mode="popLayout">
-              {insights.length > 0 ? (
-                insights.map((insight) => (
-                  <motion.div
-                    key={insight.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className={cn(
-                      "group relative overflow-hidden rounded-xl border p-4 transition-all hover:shadow-md",
-                      insight.status === 'HEALTHY' && "bg-emerald-50 border-emerald-100",
-                      insight.status === 'CAUTION' && "bg-amber-50 border-amber-100",
-                      insight.status === 'CRITICAL' && "bg-rose-50 border-rose-100"
-                    )}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={cn(
-                        "mt-1 rounded-full p-1.5",
-                        insight.status === 'HEALTHY' && "bg-emerald-100 text-emerald-600",
-                        insight.status === 'CAUTION' && "bg-amber-100 text-amber-600",
-                        insight.status === 'CRITICAL' && "bg-rose-100 text-rose-600"
-                      )}>
-                        {insight.status === 'HEALTHY' ? <CheckCircle2 className="h-4 w-4" /> : 
-                         insight.status === 'CAUTION' ? <AlertCircle className="h-4 w-4" /> : 
-                         <AlertCircle className="h-4 w-4" />}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-zinc-900">{insight.title}</h4>
-                        <p className="mt-1 text-sm text-zinc-600 line-clamp-2">{insight.message}</p>
-                        <div className="mt-3 flex items-center justify-between">
-                          <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
-                            {insight.type}
-                          </span>
-                          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs gap-1 group-hover:bg-white/50">
-                            Detail <ArrowRight className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))
-              ) : (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="rounded-full bg-zinc-100 p-4">
-                    <Info className="h-8 w-8 text-zinc-400" />
-                  </div>
-                  <p className="mt-4 text-sm text-zinc-500">Belum ada insight tersedia.</p>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="mt-4 gap-2"
-                    onClick={handleGenerateInsight}
-                    disabled={isGenerating}
-                  >
-                    {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                    Generate Insight
-                  </Button>
-                </div>
-              )}
-            </AnimatePresence>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Transactions */}
-      <Card className="border-none shadow-sm">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Transaksi Terakhir</CardTitle>
-            <CardDescription>Daftar penjualan terbaru dari POS.</CardDescription>
-          </div>
-          <Button variant="outline" size="sm">Lihat Semua</Button>
-        </CardHeader>
-        <CardContent>
-          <div className="relative overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-zinc-100 text-zinc-500">
-                  <th className="pb-3 font-medium">Order ID</th>
-                  <th className="pb-3 font-medium">Waktu</th>
-                  <th className="pb-3 font-medium">Metode</th>
-                  <th className="pb-3 font-medium">Status</th>
-                  <th className="pb-3 text-right font-medium">Total</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-50">
-                {transactions.slice(0, 5).map((t) => (
-                  <tr key={t.id} className="group hover:bg-zinc-50/50">
-                    <td className="py-4 font-medium text-zinc-900">{t.order_number}</td>
-                    <td className="py-4 text-zinc-500">{format(new Date(t.created_at), 'HH:mm')}</td>
-                    <td className="py-4">
-                      <Badge variant="secondary" className="bg-zinc-100 text-zinc-600 hover:bg-zinc-100">
-                        {t.payment_method}
-                      </Badge>
-                    </td>
-                    <td className="py-4">
-                      <div className="flex items-center gap-1.5">
-                        <div className={cn(
-                          "h-1.5 w-1.5 rounded-full",
-                          t.status === 'SUCCESS' ? "bg-emerald-500" : "bg-amber-500"
-                        )} />
-                        <span className="text-zinc-600">{t.status}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 text-right font-semibold text-zinc-900">
-                      {formatCurrency(t.total_amount)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </CardContent>
       </Card>
+
+      {/* Checkout Dialog */}
+      <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Pilih Metode Pembayaran</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            {[
+              { id: 'CASH', label: 'Tunai', icon: Banknote },
+              { id: 'CARD', label: 'Kartu', icon: CreditCard },
+              { id: 'QRIS', label: 'QRIS', icon: QrCode },
+              { id: 'TRANSFER', label: 'Transfer', icon: ArrowRight },
+            ].map((method) => {
+              const Icon = method.icon;
+              return (
+                <button
+                  key={method.id}
+                  onClick={() => setPaymentMethod(method.id as any)}
+                  className={cn(
+                    "flex flex-col items-center gap-3 rounded-xl border-2 p-4 transition-all",
+                    paymentMethod === method.id 
+                      ? "border-zinc-900 bg-zinc-50" 
+                      : "border-zinc-100 hover:border-zinc-200"
+                  )}
+                >
+                  <Icon className={cn(
+                    "h-8 w-8",
+                    paymentMethod === method.id ? "text-zinc-900" : "text-zinc-400"
+                  )} />
+                  <span className="font-medium text-zinc-900">{method.label}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="rounded-xl bg-zinc-900 p-4 text-white">
+            <div className="flex justify-between items-center">
+              <span className="text-zinc-400">Total Tagihan</span>
+              <span className="text-xl font-bold">{formatCurrency(grandTotal)}</span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              className="w-full h-12 text-lg font-bold" 
+              onClick={handleCheckout}
+              disabled={isProcessing}
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Memproses...
+                </>
+              ) : (
+                'Konfirmasi Pembayaran'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
+}
+
+function formatDate(date: Date, formatStr: string) {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return formatStr.replace('yyyy', String(yyyy)).replace('MM', mm).replace('dd', dd);
 }

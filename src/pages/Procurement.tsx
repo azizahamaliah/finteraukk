@@ -100,119 +100,134 @@ export default function Procurement() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Pengadaan Cerdas</h1>
-          <p className="text-zinc-500">Analisis kebutuhan bahan baku berdasarkan tren penjualan.</p>
+          <h1 className="text-4xl font-black tracking-tight text-zinc-900">Pengadaan Cerdas</h1>
+          <p className="mt-1 text-lg font-medium text-zinc-500">Analisis kebutuhan bahan baku berdasarkan tren penjualan.</p>
         </div>
         <Button 
           onClick={handleGenerateProcurement} 
           disabled={isGenerating}
-          className="gap-2 bg-zinc-900 text-white hover:bg-zinc-800"
+          className="h-12 px-6 rounded-xl font-bold gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
         >
-          {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+          {isGenerating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
           Analisis Kebutuhan
         </Button>
       </div>
 
       {!insight ? (
-        <Card className="border-dashed border-2 border-zinc-200 bg-transparent shadow-none">
-          <CardContent className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="rounded-full bg-zinc-100 p-6">
-              <Truck className="h-10 w-10 text-zinc-400" />
+        <Card className="border-none bg-white shadow-xl shadow-zinc-200/50 rounded-[3rem] overflow-hidden">
+          <CardContent className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="rounded-[2.5rem] bg-zinc-50 p-10 shadow-inner">
+              <Truck className="h-16 w-16 text-zinc-300" />
             </div>
-            <h3 className="mt-6 text-xl font-semibold text-zinc-900">Mulai Analisis Pengadaan</h3>
-            <p className="mt-2 max-w-sm text-zinc-500">
-              Sistem akan menghitung konsumsi bahan baku dari transaksi terakhir dan memberikan rekomendasi belanja yang efisien.
+            <h3 className="mt-10 text-3xl font-black text-zinc-900">Mulai Analisis Pengadaan</h3>
+            <p className="mt-4 max-w-md text-lg font-medium text-zinc-500 leading-relaxed">
+              Sistem AI akan menghitung konsumsi bahan baku dari transaksi terakhir dan memberikan rekomendasi belanja yang efisien.
             </p>
-            <Button variant="outline" className="mt-8" onClick={handleGenerateProcurement} disabled={isGenerating}>
+            <Button 
+              variant="outline" 
+              className="mt-10 h-14 px-8 rounded-2xl font-black text-lg border-zinc-200 hover:bg-zinc-50 transition-all" 
+              onClick={handleGenerateProcurement} 
+              disabled={isGenerating}
+            >
               Klik untuk Menganalisis
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-8 lg:grid-cols-3">
           {/* Summary Card */}
-          <Card className="lg:col-span-2 border-none shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-zinc-900" />
+          <Card className="lg:col-span-2 border-none bg-white shadow-xl shadow-zinc-200/50 rounded-[2.5rem] overflow-hidden">
+            <CardHeader className="px-8 pt-8 pb-4">
+              <CardTitle className="flex items-center gap-3 text-xl font-black">
+                <div className="rounded-xl bg-primary/10 p-2 text-primary">
+                  <BarChart3 className="h-6 w-6" />
+                </div>
                 Ringkasan Analisis
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="rounded-xl bg-zinc-50 p-6">
-                <p className="text-lg leading-relaxed text-zinc-700 italic">
+            <CardContent className="space-y-8 px-8 pb-8">
+              <div className="rounded-[2rem] bg-zinc-50 p-8 shadow-inner">
+                <p className="text-xl leading-relaxed text-zinc-700 font-medium italic">
                   "{insight.summary}"
                 </p>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-xl border border-zinc-100 p-4">
-                  <div className="flex items-center gap-2 text-sm text-zinc-500 mb-2">
+              <div className="grid gap-6 sm:grid-cols-2">
+                <div className="rounded-[2rem] border border-zinc-100 p-6 bg-white shadow-sm">
+                  <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-400 mb-4">
                     <Scale className="h-4 w-4" />
                     Skor Efisiensi
                   </div>
-                  <div className="text-3xl font-bold text-zinc-900">{insight.efficiency_score}%</div>
-                  <div className="mt-2 h-1.5 w-full rounded-full bg-zinc-100">
+                  <div className="flex items-end gap-2 mb-4">
+                    <div className="text-5xl font-black text-zinc-900">{insight.efficiency_score}</div>
+                    <div className="text-xl font-black text-primary mb-1">%</div>
+                  </div>
+                  <div className="h-3 w-full rounded-full bg-zinc-100 overflow-hidden">
                     <div 
-                      className="h-full rounded-full bg-zinc-900 transition-all" 
+                      className="h-full rounded-full bg-primary shadow-[0_0_12px_rgba(32,182,111,0.4)] transition-all duration-1000" 
                       style={{ width: `${insight.efficiency_score}%` }}
                     />
                   </div>
                 </div>
                 <div className={cn(
-                  "rounded-xl border p-4",
-                  insight.waste_risk_level === 'LOW' ? "bg-emerald-50 border-emerald-100" :
-                  insight.waste_risk_level === 'MEDIUM' ? "bg-amber-50 border-amber-100" :
-                  "bg-rose-50 border-rose-100"
+                  "rounded-[2rem] border p-6 shadow-sm",
+                  insight.waste_risk_level === 'LOW' ? "bg-emerald-50/50 border-emerald-100" :
+                  insight.waste_risk_level === 'MEDIUM' ? "bg-amber-50/50 border-amber-100" :
+                  "bg-rose-50/50 border-rose-100"
                 )}>
-                  <div className="flex items-center gap-2 text-sm text-zinc-500 mb-2">
+                  <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-400 mb-4">
                     <AlertTriangle className="h-4 w-4" />
                     Risiko Pemborosan
                   </div>
                   <div className={cn(
-                    "text-3xl font-bold",
-                    insight.waste_risk_level === 'LOW' ? "text-emerald-700" :
-                    insight.waste_risk_level === 'MEDIUM' ? "text-amber-700" :
-                    "text-rose-700"
+                    "text-5xl font-black",
+                    insight.waste_risk_level === 'LOW' ? "text-emerald-600" :
+                    insight.waste_risk_level === 'MEDIUM' ? "text-amber-600" :
+                    "text-rose-600"
                   )}>
                     {insight.waste_risk_level}
                   </div>
+                  <p className="mt-4 text-sm font-bold opacity-60">
+                    {insight.waste_risk_level === 'LOW' ? "Aman untuk stok saat ini." :
+                     insight.waste_risk_level === 'MEDIUM' ? "Perlu pemantauan berkala." :
+                     "Segera kurangi pembelian berlebih."}
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Recommendations List */}
-          <Card className="border-none shadow-sm">
-            <CardHeader>
-              <CardTitle>Rekomendasi Aksi</CardTitle>
-              <CardDescription>Daftar bahan yang perlu perhatian.</CardDescription>
+          <Card className="border-none bg-white shadow-xl shadow-zinc-200/50 rounded-[2.5rem] overflow-hidden">
+            <CardHeader className="px-8 pt-8">
+              <CardTitle className="text-xl font-black">Rekomendasi Aksi</CardTitle>
+              <CardDescription className="font-bold text-zinc-400 uppercase tracking-widest text-[10px]">Daftar bahan yang perlu perhatian.</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
-              <ScrollArea className="h-[400px] px-6">
-                <div className="space-y-4 pb-6">
+              <ScrollArea className="h-[500px] px-8">
+                <div className="space-y-6 pb-8">
                   {insight.recommendations.map((rec: any, idx: number) => (
-                    <div key={idx} className="group relative rounded-xl border border-zinc-100 p-4 transition-all hover:border-zinc-200 hover:shadow-sm">
-                      <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-bold text-zinc-900">{rec.item_name}</h4>
+                    <div key={idx} className="group relative rounded-[1.5rem] border border-zinc-100 p-5 transition-all hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5 bg-white">
+                      <div className="flex items-start justify-between mb-3">
+                        <h4 className="font-black text-zinc-900 text-lg">{rec.item_name}</h4>
                         <Badge 
-                          variant="secondary"
                           className={cn(
-                            rec.action === 'RESTOCK' ? "bg-emerald-100 text-emerald-700" :
-                            rec.action === 'REDUCE' ? "bg-rose-100 text-rose-700" :
-                            "bg-zinc-100 text-zinc-700"
+                            "border-none font-black px-3 py-1 rounded-lg",
+                            rec.action === 'RESTOCK' ? "bg-primary text-white" :
+                            rec.action === 'REDUCE' ? "bg-rose-500 text-white" :
+                            "bg-zinc-100 text-zinc-600"
                           )}
                         >
                           {rec.action}
                         </Badge>
                       </div>
-                      <p className="text-sm text-zinc-500 mb-3">{rec.reason}</p>
-                      <div className="flex items-center justify-between border-t border-zinc-50 pt-3">
-                        <span className="text-xs text-zinc-400 uppercase tracking-wider">Estimasi Kebutuhan</span>
-                        <span className="text-sm font-bold text-zinc-900">{rec.estimated_need} {rec.unit}</span>
+                      <p className="text-sm font-medium text-zinc-500 leading-relaxed mb-4">{rec.reason}</p>
+                      <div className="flex items-center justify-between border-t border-zinc-50 pt-4">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Estimasi Kebutuhan</span>
+                        <span className="text-lg font-black text-zinc-900">{rec.estimated_need} {rec.unit}</span>
                       </div>
                     </div>
                   ))}
